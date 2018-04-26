@@ -1,0 +1,42 @@
+{
+  "name": "pullpoor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uupers/pullpoor.git"
+  },
+  "keywords": [
+    "ip",
+    "uupers",
+    "poor"
+  ],
+  "author": "AryloYeung <arylo.open@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/uupers/pullpoor/issues"
+  },
+  "homepage": "https://github.com/uupers/pullpoor#readme",
+  "devDependencies": {
+    "@types/bluebird": "^3.5.20",
+    "@types/lowdb": "^1.0.1",
+    "@types/md5": "^2.1.32",
+    "@types/node": "^9.6.6",
+    "@types/request": "^2.47.0",
+    "@types/request-promise": "^4.1.41",
+    "ava": "^0.25.0",
+    "should": "^13.2.1",
+    "typescript": "^2.8.3"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "lowdb": "^1.0.0",
+    "md5": "^2.2.1",
+    "request": "^2.85.0",
+    "request-promise": "^4.2.2"
+  }
+}
