@@ -1,27 +1,16 @@
-import { URL } from 'url';
 import { BaseBank } from './base';
 import { getHTML } from '../utils';
 
 class Bank extends BaseBank {
 
     protected addrs =  [
-        'on'/** 全国 **/, '%B5%E7%D0%C5'/** 电信 **/,
-        '%C1%AA%CD%A8'/** 联通 **/, '%D2%C6%B6%AF'/** 移动 **/
-    ].map((item) => {
-            const url = new URL('http://www.89ip.cn/tiqv.php');
-            url.searchParams.set('sxb', '');
-            url.searchParams.set('tqsl', '1000');
-            url.searchParams.set('ports', '');
-            url.searchParams.set('ktip', '');
-            url.searchParams.set('submit', '%CC%E1++%C8%A1');
-            url.searchParams.set('xl', item);
-            return url.toString();
-        });
+        'http://www.66ip.cn/mo.php?sxb=&tqsl=10000&port=&export=&ktip=&sxa=&submit=%CC%E1++%C8%A1&textarea='
+    ];
 
     protected async getMoney(addr: string, index = 0) {
         try {
             return await getHTML(addr)
-                .then(($) => $('.mass').html().replace(/\s+/g, ''))
+                .then(($) => $('body').html().replace(/\s+/g, ''))
                 .then((html) => {
                     return html
                         .match(/(\d+\.){3}\d+:\d+(?!:<br>)/gi)

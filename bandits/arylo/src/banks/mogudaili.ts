@@ -1,7 +1,5 @@
-import { URL } from 'url';
 import { BaseBank } from './base';
-import cheerio = require('cheerio');
-import rp = require('request-promise');
+import { getJSON } from '../utils';
 
 class Bank extends BaseBank {
 
@@ -13,14 +11,7 @@ class Bank extends BaseBank {
     protected async getMoney(addr: string, index = 0) {
         const list: string[] = [ ];
         try {
-            return await rp({
-                method: 'GET',
-                uri: addr,
-                timeout: 60 * 1000,
-                transform: function (body) {
-                    return typeof body === 'string' ? JSON.parse(body) : body;
-                }
-            })
+            return await getJSON(addr)
                 .then((data) => {
                     return (data.msg || [ ]).map((item) => {
                         return `http://${item.ip}:${item.port}`;

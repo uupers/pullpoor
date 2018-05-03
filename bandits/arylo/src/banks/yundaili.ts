@@ -1,6 +1,7 @@
-import { BaseBank } from './base';
+
 import cheerio = require('cheerio');
-import rp = require('request-promise');
+import { BaseBank } from './base';
+import { getHTML } from '../utils';
 
 class Bank extends BaseBank {
 
@@ -11,14 +12,7 @@ class Bank extends BaseBank {
     protected async getMoney(addr: string, index = 0) {
         const list: string[] = [ ];
         try {
-            return await rp({
-                method: 'GET',
-                uri: addr,
-                timeout: 60 * 1000,
-                transform: function (body) {
-                    return cheerio.load(body);
-                }
-            })
+            return await getHTML(addr)
                 .then(($) => $('tbody tr'))
                 .then((trs) => {
                     for (const tr of trs.toArray()) {

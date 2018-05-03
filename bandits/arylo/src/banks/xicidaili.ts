@@ -1,6 +1,6 @@
 import { BaseBank } from './base';
 import cheerio = require('cheerio');
-import rp = require('request-promise');
+import { getHTML } from '../utils';
 
 class Bank extends BaseBank {
 
@@ -10,24 +10,23 @@ class Bank extends BaseBank {
         'http://www.xicidaili.com/nt/',
         'http://www.xicidaili.com/wn/',
         'http://www.xicidaili.com/wt/'
-    ];
+    ].concat(...Array(5).fill(1).map((_, index) => {
+        return [
+            `http://www.xicidaili.com/nn/${index + 1}`,
+            `http://www.xicidaili.com/nt/${index + 1}`,
+            `http://www.xicidaili.com/wn/${index + 1}`,
+            `http://www.xicidaili.com/wt/${index + 1}`
+        ];
+    }));
 
     protected async getMoney(addr: string, index = 0) {
         const list: string[] = [ ];
         try {
-            return await rp({
-                method: 'GET',
-                uri: addr,
-                timeout: 60 * 1000,
-                transform: function (body) {
-                    return cheerio.load(body);
-                }
-            })
-
+            return await getHTML(addr)
                 .then(($) => $('tr:has(td.country)'))
                 .then((trs) => {
                     for (const tr of trs.toArray()) {
-                    const tds = cheerio('td', tr);
+                        const tds = cheerio('td', tr);
                         if (!/http/i.test(tds.eq(5).text())) {
                             continue;
                         }

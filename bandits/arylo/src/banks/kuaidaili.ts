@@ -1,26 +1,21 @@
-import { URL } from 'url';
-import { BaseBank } from './base';
+
 import cheerio = require('cheerio');
-import rp = require('request-promise');
+import { BaseBank } from './base';
+import { getHTML } from '../utils';
 
 class Bank extends BaseBank {
 
     protected addrs = [
         'https://www.kuaidaili.com/free/inha/1/',
-        'https://www.kuaidaili.com/free/intr/1/'
+        'https://www.kuaidaili.com/free/intr/1/',
+        'https://www.kuaidaili.com/free/inha/2/',
+        'https://www.kuaidaili.com/free/intr/2/'
     ];
 
     protected async getMoney(addr: string, index = 0) {
         const list: string[] = [ ];
         try {
-            return await rp({
-                method: 'GET',
-                uri: addr,
-                timeout: 60 * 1000,
-                transform: function (body) {
-                    return cheerio.load(body);
-                }
-            })
+            return await getHTML(addr)
                 .then(($) => $('.con-body #list tbody tr'))
                 .then((trs) => {
                     for (const tr of trs.toArray()) {

@@ -1,28 +1,23 @@
-
-import cheerio = require('cheerio');
 import { BaseBank } from './base';
+import cheerio = require('cheerio');
 import { getHTML } from '../utils';
 
-/**
- * 在墙外
- */
 class Bank extends BaseBank {
 
     protected addrs = [
-        'http://cn-proxy.com/',
-        'http://cn-proxy.com/archives/218'
+        'https://ip.seofangfa.com/'
     ];
 
     protected async getMoney(addr: string, index = 0) {
         const list: string[] = [ ];
         try {
             return await getHTML(addr)
-                .then(($) => $('.sortable tbody tr'))
+                .then(($) => $('tr'))
                 .then((trs) => {
                     for (const tr of trs.toArray()) {
                         const tds = cheerio('td', tr);
                         const texts =
-                            [0, 1].map((index) => tds.eq(index).html());
+                            [0, 1].map((index) => tds.eq(index).text());
                         const url =
                             `http://${texts[0]}:${texts[1]}`;
                         list.push(url);
@@ -36,6 +31,7 @@ class Bank extends BaseBank {
             return list;
         }
     }
+
 }
 
 export const bank = new Bank();

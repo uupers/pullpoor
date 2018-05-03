@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { BaseBank } from './banks/base';
 
-export const banks = new class {
+class Banks {
 
     private readonly banks = fs.readdirSync(`${__dirname}/banks`)
         .filter((filepath) => {
@@ -25,3 +25,5 @@ export const banks = new class {
             });
     }
 }
+
+export const banks = new Banks();
