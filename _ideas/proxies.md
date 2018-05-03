@@ -41,8 +41,8 @@
   * http://www.mogumiao.com/proxy/free/listFreeIp
   * http://www.mogumiao.com/proxy/api/freeIp?count=15
 
-* 讯代理：极少（几秒更新一次），~10
-  * http://www.xdaili.cn/ipagent//freeip/getFreeIps?page=1&rows=10
+* ~~讯代理：极少（几秒更新一次），~10~~[已经不提供服务]
+  * ~~http://www.xdaili.cn/ipagent//freeip/getFreeIps?page=1&rows=10~~
 
 * 西刺代理：极多，~10000
   * 国内高匿：http://www.xicidaili.com/nn/
