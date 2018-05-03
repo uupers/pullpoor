@@ -2,8 +2,13 @@
   "name": "bandits",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "typings": "./lib/index.ts",
+  "engines": {
+    "node": ">=7.8"
+  },
   "scripts": {
+    "build": "tsc -P tsconfig.json",
     "test": "npm run test"
   },
   "repository": {
@@ -11,9 +16,11 @@
     "url": "git+https://github.com/uupers/pullpoor.git"
   },
   "keywords": [
-    "ip",
     "uupers",
     "poor"
+  ],
+  "files": [
+    "index.js", "dist", "lib"
   ],
   "author": "AryloYeung <arylo.open@gmail.com>",
   "license": "MIT",
@@ -23,6 +30,7 @@
   "homepage": "https://github.com/uupers/pullpoor#readme",
   "devDependencies": {
     "@types/bluebird": "^3.5.20",
+    "@types/cheerio": "^0.22.7",
     "@types/lowdb": "^1.0.1",
     "@types/md5": "^2.1.32",
     "@types/node": "^9.6.6",
@@ -34,6 +42,7 @@
   },
   "dependencies": {
     "bluebird": "^3.5.1",
+    "cheerio": "^1.0.0-rc.2",
     "lowdb": "^1.0.0",
     "md5": "^2.2.1",
     "request": "^2.85.0",
