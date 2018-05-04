@@ -21,31 +21,24 @@ class Bank extends BaseBank {
 
     protected expiredAt = date.h(1);
 
-    protected async getMoney(addr: string, index = 0) {
+    protected getMoney(addr: string, index = 0) {
         const list: string[] = [ ];
-        try {
-            return await getHTML(addr)
-                .then(($) => $('tr:has(td.country)'))
-                .then((trs) => {
-                    for (const tr of trs.toArray()) {
-                        const tds = cheerio('td', tr);
-                        if (!/http/i.test(tds.eq(5).text())) {
-                            continue;
-                        }
-                        const texts =
-                            [5, 1, 2].map((index) => tds.eq(index).text());
-                        const url =
-                            `${texts[0].toLowerCase()}://${texts[1]}:${texts[2]}`;
-                        list.push(url);
+        return getHTML(addr)
+            .then(($) => $('tr:has(td.country)'))
+            .then((trs) => {
+                for (const tr of trs.toArray()) {
+                    const tds = cheerio('td', tr);
+                    if (!/http/i.test(tds.eq(5).text())) {
+                        continue;
                     }
-                    return list;
-                });
-        } catch (error) {
-            if (index < this.RECONNECT_NUM) {
-                return this.getMoney(addr, ++index);
-            }
-            return list;
-        }
+                    const texts =
+                        [5, 1, 2].map((index) => tds.eq(index).text());
+                    const url =
+                        `${texts[0].toLowerCase()}://${texts[1]}:${texts[2]}`;
+                    list.push(url);
+                }
+                return list;
+            });
     }
 
 }

@@ -59,12 +59,34 @@ export abstract class BaseBank {
         return path.basename(filename).replace(/\.[tj]s$/, '');
     }
 
-    protected async getAddrs(): Promise<string[]> {
-        return [ ];
+    protected getAddrs(): PromiseLike<string[]> {
+        return Promise.resolve([ ]);
     }
 
-    protected async getMoney(addr: string): Promise<string[]> {
-        return [ ];
+    protected getMoney(addr: string): PromiseLike<string[]> {
+        return Promise.resolve([ ]);
+    }
+
+    private async runGetAddrs(index = 0): Promise<string[]> {
+        try {
+            return await this.getAddrs();
+        } catch (error) {
+            if (index < this.RECONNECT_NUM) {
+                return this.runGetAddrs(++index);
+            }
+            return [ ];
+        }
+    }
+
+    private async runGetMoney(addr: string, index = 0): Promise<string[]> {
+        try {
+            return await this.getMoney(addr);
+        } catch (error) {
+            if (index < this.RECONNECT_NUM) {
+                return this.runGetMoney(addr, ++index);
+            }
+            return [ ];
+        }
     }
 
     public readonly start = async (index = 0): Promise<Bank> => {
@@ -79,10 +101,10 @@ export abstract class BaseBank {
         const list: string[] = [ ];
         try {
             const addrs =
-                this.addrs.length !== 0 ? this.addrs : await this.getAddrs();
+                this.addrs.length !== 0 ? this.addrs : await this.runGetAddrs();
             for (const addr of addrs) {
                 await sleep(this.DISTANCE_TIME);
-                const moneys = (await this.getMoney(addr))
+                const moneys = (await this.runGetMoney(addr))
                     .filter((m) => isUrl(m));
                 list.push(...moneys);
             }

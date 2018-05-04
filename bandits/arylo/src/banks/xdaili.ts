@@ -17,22 +17,15 @@ class Bank extends BaseBank {
         return url.toString();
     });
 
-    protected async getMoney(addr: string, index = 0) {
-        try {
-            return await getJSON(addr)
-                .then((res) => {
-                    return res.RESULT.rows || [ ];
-                }).then((arr) => {
-                    return arr.map((item) => {
-                        return `http://${item.ip}:${item.port}`;
-                    });
+    protected getMoney(addr: string, index = 0) {
+        return getJSON(addr)
+            .then((res) => {
+                return res.RESULT.rows || [ ];
+            }).then((arr) => {
+                return arr.map((item) => {
+                    return `http://${item.ip}:${item.port}`;
                 });
-        } catch (error) {
-            if (index < this.RECONNECT_NUM) {
-                return this.getMoney(addr, ++index);
-            }
-            return [ ];
-        }
+            });
     }
 
 }

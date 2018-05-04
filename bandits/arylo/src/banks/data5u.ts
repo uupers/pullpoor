@@ -14,28 +14,21 @@ class Bank extends BaseBank {
 
     protected expiredAt = date.m(3);
 
-    protected async getMoney(addr: string, index = 0) {
+    protected getMoney(addr: string) {
         const list: string[] = [ ];
-        try {
-            return await getHTML(addr)
-                .then(($) => $('.wlist ul.l2'))
-                .then((uls) => {
-                    for (const ul of uls.toArray()) {
-                        const lis = cheerio('li', ul);
-                        const texts =
-                            [3, 0, 1].map((index) => lis.eq(index).text());
-                        const url =
-                            `${texts[0]}://${texts[1]}:${texts[2]}`;
-                        list.push(url);
-                    }
-                    return list;
-                });
-        } catch (error) {
-            if (index < this.RECONNECT_NUM) {
-                return this.getMoney(addr, ++index);
-            }
-            return list;
-        }
+        return getHTML(addr)
+            .then(($) => $('.wlist ul.l2'))
+            .then((uls) => {
+                for (const ul of uls.toArray()) {
+                    const lis = cheerio('li', ul);
+                    const texts =
+                        [3, 0, 1].map((index) => lis.eq(index).text());
+                    const url =
+                        `${texts[0]}://${texts[1]}:${texts[2]}`;
+                    list.push(url);
+                }
+                return list;
+            });
     }
 
 }

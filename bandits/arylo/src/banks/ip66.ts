@@ -9,22 +9,15 @@ class Bank extends BaseBank {
 
     protected expiredAt = date.m(30);
 
-    protected async getMoney(addr: string, index = 0) {
-        try {
-            return await getHTML(addr)
-                .then(($) => $('body').html().replace(/\s+/g, ''))
-                .then((html) => {
-                    return html
-                        .match(/(\d+\.){3}\d+:\d+(?!:<br>)/gi)
-                        .map((item) => item.toString())
-                        .map((item) => `http://${item}`);
-                });
-        } catch (error) {
-            if (index < this.RECONNECT_NUM) {
-                return this.getMoney(addr, ++index);
-            }
-            return [ ];
-        }
+    protected getMoney(addr: string) {
+        return getHTML(addr)
+            .then(($) => $('body').html().replace(/\s+/g, ''))
+            .then((html) => {
+                return html
+                    .match(/(\d+\.){3}\d+:\d+(?!:<br>)/gi)
+                    .map((item) => item.toString())
+                    .map((item) => `http://${item}`);
+            });
     }
 }
 

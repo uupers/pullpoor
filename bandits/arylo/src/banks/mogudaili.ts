@@ -10,21 +10,14 @@ class Bank extends BaseBank {
 
     protected expiredAt = date.m(30);
 
-    protected async getMoney(addr: string, index = 0) {
+    protected getMoney(addr: string, index = 0) {
         const list: string[] = [ ];
-        try {
-            return await getJSON(addr)
-                .then((data) => {
-                    return (data.msg || [ ]).map((item) => {
-                        return `http://${item.ip}:${item.port}`;
-                    });
+        return getJSON(addr)
+            .then((data) => {
+                return (data.msg || [ ]).map((item) => {
+                    return `http://${item.ip}:${item.port}`;
                 });
-        } catch (error) {
-            if (index < this.RECONNECT_NUM) {
-                return this.getMoney(addr, ++index);
-            }
-            return list;
-        }
+            });
     }
 }
 
