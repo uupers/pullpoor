@@ -12,5 +12,8 @@
     ],
     "sourceRoot": "./",
     "sourceMap": true
-  }
+  },
+  "include": [
+    "./src/**/*"
+  ]
 }

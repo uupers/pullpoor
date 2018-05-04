@@ -7,6 +7,8 @@ import mkdirp = require('mkdirp')
 import * as lodash from 'lodash';
 import { argv } from './args';
 import { Banknote } from './banks/base';
+import * as publish from './deploy';
+import { date } from './utils';
 
 export const DB_STORY_PATH = `${__dirname}/../stories`;
 export const DB_TEMP_DB_PATH = `${DB_STORY_PATH}/db.json`;
@@ -70,5 +72,6 @@ export const save = lodash.debounce(() => {
         const filepath = `${DB_STORY_PATH}/${config.filename}`;
         fs.writeFileSync(filepath, config.content, DEF_FILE_OPTIONS);
     }
+    publish.process();
     return true;
-}, 1000);
+}, date.s(3));
