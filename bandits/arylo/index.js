@@ -3,8 +3,8 @@ const utils = require('./dist/utils');
 
 (async () => {
     if (argv.detach) {
-        require('./dist').banks.detach();
         while (true) {
+            require('./dist').banks.get();
             await utils.sleep(utils.date.m(1));
         }
     } else {

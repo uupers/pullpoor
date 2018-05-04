@@ -3,7 +3,7 @@ import { URL } from 'url';
 import cheerio = require('cheerio');
 import rp = require('request-promise');
 import ua = require('random-useragent');
-import merge = require('lodash.merge');
+import { merge } from 'lodash';
 
 export const sleep = (time: number) => {
     return new Promise((reslove) => {

@@ -5,10 +5,17 @@ import isUrl = require('is-url');
 import debug = require('debug');
 import { sleep, date } from '../utils';
 import { dbMemery } from '../db';
+import * as lodash from 'lodash';
+
+export interface Money {
+    id: string;
+    createdAt: number;
+}
 
 export class Bank {
+    private readonly VALID_PERIOD = date.d(3);
     private source: string;
-    private moneys: string[] = [ ];
+    private moneys: Money[] = [ ];
     private updatedAt = 0;
 
     constructor(source: string) {
@@ -20,11 +27,27 @@ export class Bank {
         } catch (error) { }
     }
 
+    private brokenFakeMoney() {
+        const now = Date.now();
+        lodash.remove(this.moneys, (m) => {
+            return (m.createdAt + this.VALID_PERIOD) < now;
+        });
+    }
+
     public add(moneys: string[] = [ ]) {
-        const moneySet = new Set<string>(this.moneys.concat(moneys));
-        this.moneys = [...moneySet.values()];
+        this.brokenFakeMoney();
+        const moneySet = new Set<string>(
+            lodash.flatMap(this.moneys, (obj) => obj.id)
+        );
+        const newMoneys = moneys.filter((m) => !moneySet.has(m));
+        if (newMoneys.length === 0) {
+            return this;
+        }
         this.updatedAt = Date.now();
-        dbMemery.get('banks').set(this.source, this).write();
+        this.moneys.push(...lodash.map(newMoneys, (m) => {
+            return { id: m, createdAt: this.updatedAt };
+        }));
+        this.save();
         return this;
     }
 
@@ -35,6 +58,10 @@ export class Bank {
             updatedAt: this.updatedAt,
             length: this.moneys.length
         };
+    }
+
+    private save() {
+        dbMemery.get('banks').set(this.source, this.get()).write();
     }
 }
 

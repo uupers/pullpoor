@@ -8,7 +8,7 @@ class Bank extends BaseBank {
         'http://ip.yqie.com/ipproxy.htm'
     ];
 
-    protected expiredAt = date.d(3);
+    protected expiredAt = date.h(3);
 
     protected async getMoney(addr: string, index = 0) {
         const list: string[] = [ ];

@@ -13,7 +13,7 @@ class Bank extends BaseBank {
         'http://cn-proxy.com/archives/218'
     ];
 
-    protected expiredAt = date.d(12);
+    protected expiredAt = date.h(12);
 
     protected getMoney(addr: string) {
         const list: string[] = [ ];

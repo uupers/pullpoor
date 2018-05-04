@@ -22,7 +22,7 @@ class Banks {
         }
     }
 
-    public detach() {
+    public loop() {
         schedule.scheduleJob('*/5 * * * *', () => {
             this.get();
         });
@@ -42,7 +42,7 @@ class Banks {
                 const set = new Set<string>();
                 for (const b of bs) {
                     for (const money of b.get().moneys) {
-                        set.add(money);
+                        set.add(money.id);
                     }
                 }
                 return [...set.values()];
