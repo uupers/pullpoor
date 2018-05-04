@@ -43,7 +43,7 @@ const jsonContentFactroy = (list: string[]) => {
     });
 }
 
-export const save = () => {
+export const save = lodash.debounce(() => {
     if ((argv.deploy || argv.useCache) && !fs.existsSync(DB_STORY_PATH)) {
         mkdirp.sync(DB_STORY_PATH);
     }
@@ -71,4 +71,4 @@ export const save = () => {
         fs.writeFileSync(filepath, config.content, DEF_FILE_OPTIONS);
     }
     return true;
-};
+}, 1000);

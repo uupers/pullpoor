@@ -33,7 +33,7 @@ class Banks {
     }
 
     public async get() {
-        const list = await Promise.all(this.start())
+        await Promise.all(this.start().map(() => db.save()));
         return this.getList();
     }
 }
