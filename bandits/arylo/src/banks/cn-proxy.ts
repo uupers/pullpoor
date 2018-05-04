@@ -1,7 +1,7 @@
 
 import cheerio = require('cheerio');
 import { BaseBank } from './base';
-import { getHTML } from '../utils';
+import { getHTML, date } from '../utils';
 
 /**
  * 在墙外
@@ -12,6 +12,8 @@ class Bank extends BaseBank {
         'http://cn-proxy.com/',
         'http://cn-proxy.com/archives/218'
     ];
+
+    protected expiredAt = date.d(12);
 
     protected async getMoney(addr: string, index = 0) {
         const list: string[] = [ ];

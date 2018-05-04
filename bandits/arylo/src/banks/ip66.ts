@@ -1,11 +1,13 @@
 import { BaseBank } from './base';
-import { getHTML } from '../utils';
+import { getHTML, date } from '../utils';
 
 class Bank extends BaseBank {
 
     protected addrs =  [
         'http://www.66ip.cn/mo.php?sxb=&tqsl=10000&port=&export=&ktip=&sxa=&submit=%CC%E1++%C8%A1&textarea='
     ];
+
+    protected expiredAt = date.m(30);
 
     protected async getMoney(addr: string, index = 0) {
         try {

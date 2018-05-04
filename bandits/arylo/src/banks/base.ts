@@ -1,12 +1,63 @@
-import { sleep } from "../utils";
+import * as path from 'path';
+import { URL } from 'url';
+import stackTrace = require('stack-trace');
+import isUrl = require('is-url');
+import debug = require('debug');
+import { sleep, date } from '../utils';
+import { dbMemery } from '../db';
+
+export class Bank {
+    private source: string;
+    private moneys: string[] = [ ];
+    private updatedAt = 0;
+
+    constructor(source: string) {
+        this.source = source;
+        try {
+            const obj = dbMemery.get('banks').get(source).value();
+            this.moneys = obj.moneys;
+            this.updatedAt = obj.updatedAt;
+        } catch (error) { }
+    }
+
+    public add(moneys: string[] = [ ]) {
+        const moneySet = new Set<string>(this.moneys.concat(moneys));
+        this.moneys = [...moneySet.values()];
+        this.updatedAt = Date.now();
+        dbMemery.get('banks').set(this.source, this).write();
+        return this;
+    }
+
+    public get() {
+        return {
+            source: this.source,
+            moneys: this.moneys,
+            updatedAt: this.updatedAt,
+            length: this.moneys.length
+        };
+    }
+}
 
 export abstract class BaseBank {
 
     protected readonly RECONNECT_NUM = 10;
     protected readonly DISTANCE_TIME = 200;
-    protected skip = false;
+    protected readonly NAME = this.getName();
 
+    private log = debug(`bandits:banks:${this.NAME}`);
+    protected skip = false;
     protected addrs: string[] = [ ];
+    protected bank = new Bank(this.NAME);
+    protected expiredAt = date.m(5);
+
+    private getName() {
+        const trace = stackTrace.get();
+        // 0: BaseBank.getName
+        // 1: class BaseBank
+        // 2: child class
+        const filename = trace[2].getFileName()
+        return path.basename(filename).replace(/\.[tj]s$/, '');
+    }
 
     protected async getAddrs(): Promise<string[]> {
         return [ ];
@@ -16,27 +67,34 @@ export abstract class BaseBank {
         return [ ];
     }
 
-    public readonly start = async (index = 0): Promise<string[]> => {
+    public readonly start = async (index = 0): Promise<Bank> => {
         if (this.skip) {
-            return [ ];
+            this.log('Skip');
+            return this.bank;
         }
-        const set = new Set<string>();
+        if ((Date.now() - this.bank.get().updatedAt) <= this.expiredAt) {
+            this.log('Use Cache');
+            return this.bank;
+        }
+        const list: string[] = [ ];
         try {
             const addrs =
                 this.addrs.length !== 0 ? this.addrs : await this.getAddrs();
             for (const addr of addrs) {
                 await sleep(this.DISTANCE_TIME);
-                for (const m of await this.getMoney(addr)) {
-                    set.add(m);
-                }
+                const moneys = (await this.getMoney(addr))
+                    .filter((m) => isUrl(m));
+                list.push(...moneys);
             }
         } catch (error) {
             if (this.RECONNECT_NUM >= index) {
                 return this.start();
             }
+            this.log('Get Fail');
             throw error;
         }
-        return [...set.values()];
+        this.log('Get %s Moneys', list.length);
+        return this.bank.add(list);
     }
 
 }

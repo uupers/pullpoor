@@ -1,5 +1,5 @@
 import { BaseBank } from './base';
-import { getJSON } from '../utils';
+import { getJSON, date } from '../utils';
 
 class Bank extends BaseBank {
 
@@ -7,6 +7,8 @@ class Bank extends BaseBank {
         'http://www.mogumiao.com/proxy/free/listFreeIp',
         'http://www.mogumiao.com/proxy/api/freeIp?count=20'
     ];
+
+    protected expiredAt = date.m(30);
 
     protected async getMoney(addr: string, index = 0) {
         const list: string[] = [ ];

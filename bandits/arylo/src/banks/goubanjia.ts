@@ -1,12 +1,14 @@
 import { BaseBank } from './base';
 import cheerio = require('cheerio');
-import { getHTML } from '../utils';
+import { getHTML, date } from '../utils';
 
 class Bank extends BaseBank {
 
     protected addrs = [
         'http://www.goubanjia.com/'
     ];
+
+    protected expiredAt = date.m(3);
 
     protected async getMoney(addr: string, index = 0) {
         const reg = /<\w+\s+style="display:\s*none;">.+?>/g;

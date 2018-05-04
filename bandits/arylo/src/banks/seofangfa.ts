@@ -1,12 +1,14 @@
 import { BaseBank } from './base';
 import cheerio = require('cheerio');
-import { getHTML } from '../utils';
+import { getHTML, date } from '../utils';
 
 class Bank extends BaseBank {
 
     protected addrs = [
         'https://ip.seofangfa.com/'
     ];
+
+    protected expiredAt = date.m(15);
 
     protected async getMoney(addr: string, index = 0) {
         const list: string[] = [ ];

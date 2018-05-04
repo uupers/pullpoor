@@ -1,6 +1,6 @@
 import { URL } from 'url';
 import { BaseBank } from './base';
-import { getHTML } from '../utils';
+import { getHTML, date } from '../utils';
 
 class Bank extends BaseBank {
 
@@ -17,6 +17,8 @@ class Bank extends BaseBank {
             url.searchParams.set('xl', item);
             return url.toString();
         });
+
+    protected expiredAt = date.m(30);
 
     protected async getMoney(addr: string, index = 0) {
         try {
