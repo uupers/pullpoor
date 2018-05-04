@@ -7,44 +7,49 @@ import { sleep, date } from '../utils';
 import { dbMemery } from '../db';
 import * as lodash from 'lodash';
 
-export interface Money {
+export interface Banknote {
+    /** 编码 */
     id: string;
+    /** 生产日期 */
     createdAt: number;
 }
 
-export class Bank {
+export class Store {
+    /** 有效时间 */
     private readonly VALID_PERIOD = date.d(3);
     private source: string;
-    private moneys: Money[] = [ ];
+    /** 票库记录列表 */
+    private list: Banknote[] = [ ];
     private updatedAt = 0;
 
     constructor(source: string) {
         this.source = source;
         try {
+            // 加载旧记录
             const obj = dbMemery.get('banks').get(source).value();
-            this.moneys = obj.moneys;
+            this.list = obj.list;
             this.updatedAt = obj.updatedAt;
         } catch (error) { }
     }
 
-    private brokenFakeMoney() {
+    private brokenFakeBanknote() {
         const now = Date.now();
-        lodash.remove(this.moneys, (m) => {
+        lodash.remove(this.list, (m) => {
             return (m.createdAt + this.VALID_PERIOD) < now;
         });
     }
 
-    public add(moneys: string[] = [ ]) {
-        this.brokenFakeMoney();
-        const moneySet = new Set<string>(
-            lodash.flatMap(this.moneys, (obj) => obj.id)
+    public add(ids: string[] = [ ]) {
+        this.brokenFakeBanknote();
+        const banknoteSet = new Set<string>(
+            lodash.flatMap(this.list, (obj) => obj.id)
         );
-        const newMoneys = moneys.filter((m) => !moneySet.has(m));
-        if (newMoneys.length === 0) {
+        const newBanknotes = ids.filter((m) => !banknoteSet.has(m));
+        if (newBanknotes.length === 0) {
             return this;
         }
         this.updatedAt = Date.now();
-        this.moneys.push(...lodash.map(newMoneys, (m) => {
+        this.list.push(...lodash.map(newBanknotes, (m) => {
             return { id: m, createdAt: this.updatedAt };
         }));
         this.save();
@@ -54,9 +59,9 @@ export class Bank {
     public get() {
         return {
             source: this.source,
-            moneys: this.moneys,
+            list: this.list,
             updatedAt: this.updatedAt,
-            length: this.moneys.length
+            length: this.list.length
         };
     }
 
@@ -69,12 +74,15 @@ export abstract class BaseBank {
 
     protected readonly RECONNECT_NUM = 10;
     protected readonly DISTANCE_TIME = 200;
+    /** 行名 */
     protected readonly NAME = this.getName();
 
     private log = debug(`bandits:banks:${this.NAME}`);
     protected skip = false;
+    /** 地址 */
     protected addrs: string[] = [ ];
-    protected bank = new Bank(this.NAME);
+    /** 票库 */
+    protected store = new Store(this.NAME);
     protected expiredAt = date.m(5);
 
     private getName() {
@@ -90,7 +98,7 @@ export abstract class BaseBank {
         return Promise.resolve([ ]);
     }
 
-    protected getMoney(addr: string): PromiseLike<string[]> {
+    protected getBanknotes(addr: string): PromiseLike<string[]> {
         return Promise.resolve([ ]);
     }
 
@@ -105,25 +113,25 @@ export abstract class BaseBank {
         }
     }
 
-    private async runGetMoney(addr: string, index = 0): Promise<string[]> {
+    private async runGetBanknotes(addr: string, index = 0): Promise<string[]> {
         try {
-            return await this.getMoney(addr);
+            return await this.getBanknotes(addr);
         } catch (error) {
             if (index < this.RECONNECT_NUM) {
-                return this.runGetMoney(addr, ++index);
+                return this.runGetBanknotes(addr, ++index);
             }
             return [ ];
         }
     }
 
-    public readonly start = async (index = 0): Promise<Bank> => {
+    public readonly start = async (index = 0): Promise<Store> => {
         if (this.skip) {
             this.log('Skip');
-            return this.bank;
+            return this.store;
         }
-        if ((Date.now() - this.bank.get().updatedAt) <= this.expiredAt) {
+        if ((Date.now() - this.store.get().updatedAt) <= this.expiredAt) {
             this.log('Use Cache');
-            return this.bank;
+            return this.store;
         }
         const list: string[] = [ ];
         try {
@@ -131,9 +139,9 @@ export abstract class BaseBank {
                 this.addrs.length !== 0 ? this.addrs : await this.runGetAddrs();
             for (const addr of addrs) {
                 await sleep(this.DISTANCE_TIME);
-                const moneys = (await this.runGetMoney(addr))
+                const notes = (await this.runGetBanknotes(addr))
                     .filter((m) => isUrl(m));
-                list.push(...moneys);
+                list.push(...notes);
             }
         } catch (error) {
             if (this.RECONNECT_NUM >= index) {
@@ -142,8 +150,8 @@ export abstract class BaseBank {
             this.log('Get Fail');
             throw error;
         }
-        this.log('Get %s Moneys', list.length);
-        return this.bank.add(list);
+        this.log('Get %s Banknotes', list.length);
+        return this.store.add(list);
     }
 
 }

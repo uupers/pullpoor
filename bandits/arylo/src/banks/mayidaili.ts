@@ -21,7 +21,7 @@ class Bank extends BaseBank {
             });
     }
 
-    protected getMoney(addr: string, index = 0) {
+    protected getBanknotes(addr: string) {
         const list: string[] = [ ];
         return getHTML(addr)
             .then(($) => $('.container p'))

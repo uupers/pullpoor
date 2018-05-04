@@ -10,7 +10,7 @@ class Bank extends BaseBank {
 
     protected expiredAt = date.m(30);
 
-    protected getMoney(addr: string, index = 0) {
+    protected getBanknotes(addr: string) {
         const list: string[] = [ ];
         return getJSON(addr)
             .then((data) => {

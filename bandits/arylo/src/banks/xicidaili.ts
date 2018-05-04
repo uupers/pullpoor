@@ -21,7 +21,7 @@ class Bank extends BaseBank {
 
     protected expiredAt = date.h(1);
 
-    protected getMoney(addr: string, index = 0) {
+    protected getBanknotes(addr: string) {
         const list: string[] = [ ];
         return getHTML(addr)
             .then(($) => $('tr:has(td.country)'))

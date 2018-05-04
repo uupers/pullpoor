@@ -15,7 +15,7 @@ class Bank extends BaseBank {
 
     protected expiredAt = date.h(12);
 
-    protected getMoney(addr: string) {
+    protected getBanknotes(addr: string) {
         const list: string[] = [ ];
         return getHTML(addr)
             .then(($) => $('.sortable tbody tr'))

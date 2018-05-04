@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import debug = require('debug');
 import schedule = require('node-schedule');
-import { BaseBank, Bank } from './base';
+import { BaseBank, Store } from './base';
 import * as db from '../db';
 
 class Banks {
@@ -15,11 +15,10 @@ class Banks {
         .map((filepath) => require(`./${filepath}`).bank as BaseBank);
 
     public start() {
-        for (const bank of this.banks) {
-            bank.start().then(() => {
-                db.save();
-            });
-        }
+        return this.banks.reduce((arr, bank) => {
+            arr.push(bank.start())
+            return arr;
+        }, [ ] as Promise<Store>[]);
     }
 
     public loop() {
@@ -30,25 +29,12 @@ class Banks {
     }
 
     public getList() {
-        return db.getList();
+        return db.getIds();
     }
 
     public async get() {
-        const list = await Promise.all(this.banks.reduce((arr, bank) => {
-            arr.push(bank.start())
-            return arr;
-        }, [ ] as Promise<Bank>[]))
-            .then((bs) => {
-                const set = new Set<string>();
-                for (const b of bs) {
-                    for (const money of b.get().moneys) {
-                        set.add(money.id);
-                    }
-                }
-                return [...set.values()];
-            });
-        db.save();
-        return list;
+        const list = await Promise.all(this.start())
+        return this.getList();
     }
 }
 

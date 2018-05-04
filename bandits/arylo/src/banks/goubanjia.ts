@@ -10,7 +10,7 @@ class Bank extends BaseBank {
 
     protected expiredAt = date.m(3);
 
-    protected async getMoney(addr: string) {
+    protected async getBanknotes(addr: string) {
         const reg = /<\w+\s+style="display:\s*none;">.+?>/g;
         const list: string[] = [ ];
         const trs = await getHTML(addr)

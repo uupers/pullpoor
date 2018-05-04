@@ -8,7 +8,7 @@ class Bank extends BaseBank {
         'http://www.httpdaili.com/'
     ];
 
-    protected async getMoney(addr: string) {
+    protected async getBanknotes(addr: string) {
         const list: string[] = [ ];
         const tables = await getHTML(addr)
             .then(($) => $('table table'));

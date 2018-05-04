@@ -17,7 +17,7 @@ class Bank extends BaseBank {
         return url.toString();
     });
 
-    protected getMoney(addr: string, index = 0) {
+    protected getBanknotes(addr: string) {
         return getJSON(addr)
             .then((res) => {
                 return res.RESULT.rows || [ ];

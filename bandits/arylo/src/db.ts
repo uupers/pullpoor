@@ -6,7 +6,7 @@ import FileSync = require('lowdb/adapters/FileSync')
 import mkdirp = require('mkdirp')
 import * as lodash from 'lodash';
 import { argv } from './args';
-import { Money } from './banks/base';
+import { Banknote } from './banks/base';
 
 export const DB_STORY_PATH = `${__dirname}/../stories`;
 export const DB_TEMP_DB_PATH = `${DB_STORY_PATH}/db.json`;
@@ -22,16 +22,26 @@ dbMemery
     .defaults(argv.useCache && dbTemp ? dbTemp.getState() : DEF_DATA_FORMAT)
     .write();
 
-export const getList = () => {
+export const getIds = () => {
     const list: string[] = [ ]
     const sources: string[] = dbMemery.get('banks').keys().value();
     for (const source of sources) {
-        const moneyList: Money[] =
-            dbMemery.get('banks').get(source).get('moneys').value();
-        list.push(...lodash.map(moneyList, (item) => item.id));
+        const noteList: Banknote[] =
+            dbMemery.get('banks').get(source).get('list').value();
+        list.push(...lodash.map(noteList, (item) => item.id));
     }
     return [...new Set<string>(list)].sort();
 };
+
+const jsonContentFactroy = (list: string[]) => {
+    return JSON.stringify({
+        list,
+        length: list.length,
+        status: 200,
+        createdAt: Date.now(),
+        version: DEF_DATA_FORMAT.version
+    });
+}
 
 export const save = () => {
     if ((argv.deploy || argv.useCache) && !fs.existsSync(DB_STORY_PATH)) {
@@ -46,18 +56,19 @@ export const save = () => {
         return true;
     }
 
-    const list = getList();
-    // list
-    let data = list.join('\n');
-    fs.writeFileSync(`${DB_STORY_PATH}/story.list`, data, DEF_FILE_OPTIONS);
-    // json
-    data = JSON.stringify({
-        list,
-        length: list.length,
-        status: 200,
-        createdAt: Date.now(),
-        version: DEF_DATA_FORMAT.version
-    });
-    fs.writeFileSync(`${DB_STORY_PATH}/story.json`, data, DEF_FILE_OPTIONS);
+    const list = getIds();
+    const httpList = list.filter((item) => !!~item.indexOf('http://'));
+    const httpsList = list.filter((item) => !!~item.indexOf('https://'));
+    const configs = [{
+        filename: 'story.list',
+        content: list.join('\n')
+    }, {
+        filename: 'story.json',
+        content: jsonContentFactroy(list)
+    }];
+    for (const config of configs) {
+        const filepath = `${DB_STORY_PATH}/${config.filename}`;
+        fs.writeFileSync(filepath, config.content, DEF_FILE_OPTIONS);
+    }
     return true;
 };

@@ -9,7 +9,7 @@ class Bank extends BaseBank {
 
     protected expiredAt = date.m(30);
 
-    protected getMoney(addr: string) {
+    protected getBanknotes(addr: string) {
         return getHTML(addr)
             .then(($) => $('body').html().replace(/\s+/g, ''))
             .then((html) => {
