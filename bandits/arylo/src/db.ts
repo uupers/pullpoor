@@ -72,6 +72,8 @@ export const save = lodash.debounce(() => {
         const filepath = `${DB_STORY_PATH}/${config.filename}`;
         fs.writeFileSync(filepath, config.content, DEF_FILE_OPTIONS);
     }
-    publish.process();
+    if (argv.publish && argv.publish.length !== 0) {
+        publish.process();
+    }
     return true;
 }, date.s(3));

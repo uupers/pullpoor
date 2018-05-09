@@ -1,10 +1,16 @@
 import * as fs from 'fs';
 import debug = require('debug');
 import schedule = require('node-schedule');
-import { BaseBank, Store } from './base';
+import { BaseBank, Store, BankEvent } from './base';
 import * as db from '../db';
+import { EventEmitter } from 'events';
 
-class Banks {
+export const BanksEvent = {
+    'GETTING': Symbol('GETTING'),
+    'GETTED': Symbol('GETTED')
+};
+
+export const banks = new class Banks extends EventEmitter {
 
     private log = debug('bandits:banks');
 
@@ -14,6 +20,15 @@ class Banks {
         })
         .map((filepath) => require(`./${filepath}`).bank as BaseBank);
 
+    constructor() {
+        super();
+        this.banks.forEach((bank) => {
+            bank.on(BankEvent.SUCCESS, () => {
+                db.save();
+            });
+        });
+    }
+
     public start() {
         return this.banks.reduce((arr, bank) => {
             arr.push(bank.start())
@@ -22,10 +37,11 @@ class Banks {
     }
 
     public loop() {
-        schedule.scheduleJob('*/5 * * * *', () => {
+        const job = schedule.scheduleJob('*/5 * * * *', () => {
             this.get();
         });
         this.get();
+        return () => schedule.cancelJob(job);
     }
 
     public getList() {
@@ -33,9 +49,11 @@ class Banks {
     }
 
     public async get() {
-        await Promise.all(this.start().map(() => db.save()));
+        this.emit(BanksEvent.GETTING);
+        await Promise.all(this.start())
+            .then(() => {
+                this.emit(BanksEvent.GETTED);
+            });
         return this.getList();
     }
 }
-
-export const banks = new Banks();

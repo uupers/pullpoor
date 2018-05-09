@@ -7,10 +7,7 @@ import { argv } from './args';
 import { date } from './utils';
 
 export const process = lodash.debounce(async () => {
-    const token = argv.publish;
-    if (!token || token.length === 0) {
-        return false;
-    }
+    const token: string = argv.publish;
     await rimraf.sync(`${DB_STORY_PATH}/.git`);
     fs.createReadStream(`${DB_STORY_PATH}/../README.md`)
         .pipe(fs.createWriteStream(`${DB_STORY_PATH}/README.md`));

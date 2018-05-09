@@ -6,6 +6,7 @@ import debug = require('debug');
 import { sleep, date } from '../utils';
 import { dbMemery } from '../db';
 import * as lodash from 'lodash';
+import { EventEmitter } from 'events';
 
 export interface Banknote {
     /** 编码 */
@@ -14,7 +15,12 @@ export interface Banknote {
     createdAt: number;
 }
 
-export class Store {
+const StoreEvent = {
+    'BROKEN': Symbol('BROKEN'),
+    'ADD': Symbol('ADD')
+};
+
+export class Store extends EventEmitter {
     /** 有效时间 */
     private readonly VALID_PERIOD = date.d(3);
     private source: string;
@@ -23,6 +29,7 @@ export class Store {
     private updatedAt = 0;
 
     constructor(source: string) {
+        super();
         this.source = source;
         try {
             // 加载旧记录
@@ -34,9 +41,12 @@ export class Store {
 
     private brokenFakeBanknote() {
         const now = Date.now();
-        lodash.remove(this.list, (m) => {
+        const list = lodash.remove(this.list, (m) => {
             return (m.createdAt + this.VALID_PERIOD) < now;
         });
+        if (list.length !== 0) {
+            this.emit(StoreEvent.BROKEN, this.source);
+        }
     }
 
     public add(ids: string[] = [ ]) {
@@ -46,6 +56,7 @@ export class Store {
         );
         const newBanknotes = ids.filter((m) => !banknoteSet.has(m));
         if (newBanknotes.length === 0) {
+            this.emit(StoreEvent.ADD, this.source, newBanknotes.length);
             return this;
         }
         this.updatedAt = Date.now();
@@ -53,6 +64,7 @@ export class Store {
             return { id: m, createdAt: this.updatedAt };
         }));
         this.save();
+        this.emit(StoreEvent.ADD, this.source, newBanknotes.length);
         return this;
     }
 
@@ -70,7 +82,17 @@ export class Store {
     }
 }
 
-export abstract class BaseBank {
+export const BankEvent = {
+    'SKIP': Symbol('SKIP'),
+    'CACHED': Symbol('CACHED'),
+    'RETRY': Symbol('RETRY'),
+    'SUCCESS': Symbol('SUCCESS'),
+    'FAIL': Symbol('FAIL'),
+    'START': Symbol('START'),
+    'END': Symbol('END')
+};
+
+export abstract class BaseBank extends EventEmitter {
 
     protected readonly RECONNECT_NUM = 10;
     protected readonly DISTANCE_TIME = 200;
@@ -127,11 +149,16 @@ export abstract class BaseBank {
     public readonly start = async (index = 0): Promise<Store> => {
         if (this.skip) {
             this.log('Skip');
+            this.emit(BankEvent.SKIP, this.NAME);
             return this.store;
         }
         if ((Date.now() - this.store.get().updatedAt) <= this.expiredAt) {
             this.log('Use Cache');
+            this.emit(BankEvent.CACHED, this.NAME);
             return this.store;
+        }
+        if (index === 0) {
+            this.emit(BankEvent.START, this.NAME);
         }
         const list: string[] = [ ];
         try {
@@ -145,12 +172,25 @@ export abstract class BaseBank {
             }
         } catch (error) {
             if (this.RECONNECT_NUM >= index) {
+                this.log(`RETRY`);
+                this.emit(BankEvent.RETRY, this.NAME, index);
                 return this.start();
             }
             this.log('Get Fail');
+            this.emit(BankEvent.FAIL, this.NAME);
+            this.emit(BankEvent.END, this.NAME);
             throw error;
         }
-        this.log('Get %s Banknotes', list.length);
+        this.store.once(StoreEvent.ADD, (name, length) => {
+            if (length === 0) {
+                this.log('Use Cache');
+                this.emit(BankEvent.CACHED, this.NAME);
+            } else {
+                this.log('Get %s Banknotes', length);
+                this.emit(BankEvent.SUCCESS, this.NAME);
+            }
+            this.emit(BankEvent.END, this.NAME);
+        });
         return this.store.add(list);
     }
 

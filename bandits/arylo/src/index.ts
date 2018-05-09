@@ -1,2 +1,1 @@
-export const { banks } = require('./banks');
-
+export * from './banks';
