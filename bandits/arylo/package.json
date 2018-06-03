@@ -1,5 +1,5 @@
 {
-  "name": "bandits",
+  "name": "pullpoor",
   "version": "1.0.1",
   "description": "",
   "main": "./dist/index.js",
@@ -9,10 +9,12 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "start": "npm run clean && npm run build && node index.js",
-    "tsc": "tsc -P tsconfig.json",
-    "build": "npm run tsc",
-    "test": "npm run clean && tsc -P tsconfig.test.json && ava dist/test"
+    "prestart": "npm run clean && npm run build",
+    "start": "node index.js",
+    "tsc": "tsc --locale zh-cn --pretty",
+    "build": "npm run tsc -- -P tsconfig.json",
+    "pretest": "npm run clean && npm run tsc -- -P tsconfig.test.json",
+    "test": "ava dist/test"
   },
   "repository": {
     "type": "git",
