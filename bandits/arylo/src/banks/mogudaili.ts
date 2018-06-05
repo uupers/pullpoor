@@ -1,5 +1,6 @@
 import { BaseBank } from './base';
-import { getJSON, date } from '../utils';
+import { getJSON } from '../utils';
+import * as date from 'dtss';
 
 class Bank extends BaseBank {
 

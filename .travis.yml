@@ -2,14 +2,15 @@ language: node_js
 
 node_js:
   - "node"
+  - "lts/*"
   - "8"
 
 before_install:
   - "cd bandits/arylo"
-
 install:
   - "npm install"
-
+before_script:
+  - "npm install nyc --global"
 script:
-  - "npm test"
+  - "nyc npm test"
   - "npm start"

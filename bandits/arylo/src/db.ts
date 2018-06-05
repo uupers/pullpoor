@@ -8,7 +8,7 @@ import * as lodash from 'lodash';
 import { argv } from './args';
 import { Banknote } from './banks/base';
 import * as publish from './deploy';
-import { date } from './utils';
+import * as date from 'dtss';
 
 export const DB_STORY_PATH = `${__dirname}/../stories`;
 export const DB_TEMP_DB_PATH = `${DB_STORY_PATH}/db.json`;

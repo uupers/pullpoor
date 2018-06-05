@@ -4,7 +4,7 @@ import lodash = require('lodash');
 import gitModule = require('simple-git');
 import { DB_STORY_PATH } from './db';
 import { argv } from './args';
-import { date } from './utils';
+import * as date from 'dtss';
 
 export const process = lodash.debounce(async () => {
     const token: string = argv.publish;

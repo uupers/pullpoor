@@ -1,6 +1,7 @@
 import { BaseBank } from './base';
 import cheerio = require('cheerio');
-import { getHTML, date } from '../utils';
+import { getHTML } from '../utils';
+import * as date from 'dtss';
 
 class Bank extends BaseBank {
 

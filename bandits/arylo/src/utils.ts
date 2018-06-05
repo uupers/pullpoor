@@ -49,23 +49,3 @@ export const getJSON = (url: string, opts?) => {
     }, opts);
     return rp(options);
 };
-
-export const date = new class {
-
-    public s(t: number) {
-        return t * 1000;
-    }
-
-    public m(t: number) {
-        return t * this.s(60);
-    }
-
-    public h(t: number) {
-        return t * this.m(60);
-    }
-
-    public d(t: number) {
-        return t * this.h(24);
-    }
-
-};

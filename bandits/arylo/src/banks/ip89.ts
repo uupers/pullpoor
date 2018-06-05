@@ -1,6 +1,7 @@
 import { URL } from 'url';
 import { BaseBank } from './base';
-import { getHTML, date } from '../utils';
+import { getHTML } from '../utils';
+import * as date from 'dtss';
 
 class Bank extends BaseBank {
 
